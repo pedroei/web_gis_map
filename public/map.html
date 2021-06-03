@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leaflet-IS</title>
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+      integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+      integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+      crossorigin=""
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.4.5/Control.FullScreen.css"
+    />
+    <link rel="stylesheet" href="leaflet-sidebar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css"
+    />
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
+      html,
+      body,
+      #map {
+        height: 100%;
+        font: 10pt 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      }
+
+      .lorem {
+        font-style: italic;
+        text-align: justify;
+        color: #aaa;
+      }
+
+      .awesome-marker i {
+        font-size: 18px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- optionally define the sidebar content via HTML markup -->
+    <div id="sidebar" class="leaflet-sidebar collapsed">
+      <!-- nav tabs -->
+      <div class="leaflet-sidebar-tabs">
+        <!-- top aligned tabs -->
+        <ul role="tablist">
+          <!--<li>
+            <a href="#home" role="tab"><i class="fa fa-bars active"></i></a>
+          </li> -->
+          <li id="searchI">
+            <a href="#search" role="tab"><i class="fa fa-search"></i></a>
+          </li>
+          <li>
+            <a href="#layers" role="tab"><i class="fa fa-layer-group"></i></a>
+          </li>
+          <li>
+            <a href="#logout" role="tab"><i class="fa fa-sign-out-alt"></i></a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- panel content -->
+      <div class="leaflet-sidebar-content">
+        <!-- <div class="leaflet-sidebar-pane" id="home">
+          <h1 class="leaflet-sidebar-header">
+            Leaflet-IS
+            <span class="leaflet-sidebar-close"
+              ><i class="fa fa-caret-left"></i
+            ></span>
+          </h1>
+        </div> -->
+
+        <div class="leaflet-sidebar-pane" id="search">
+          <h1 class="leaflet-sidebar-header">
+            Pesquisar
+            <span class="leaflet-sidebar-close"
+              ><i class="fa fa-search"></i
+            ></span>
+          </h1>
+          <h2>Insira uma Localidade</h2>
+          <p>
+            <input type="text" id="pesquisa" />
+            <button id="btnPesquisa">Pesquisar</button>
+          </p>
+          <hr />
+          <h2>Limites Administrativos de Viana</h2>
+          <p>
+            <button id="btnLimites">Apresentar Limites</button>
+            <button id="btnLimitesR">Retirar Limites</button>
+          </p>
+        </div>
+
+        <div class="leaflet-sidebar-pane" id="layers">
+          <h1 class="leaflet-sidebar-header">
+            Layers<span class="leaflet-sidebar-close"
+              ><i class="fa fa-layer-group"></i
+            ></span>
+          </h1>
+          <p>
+            Tipo de mapa
+            <select id="tipoMapa">
+              <option>Base</option>
+              <option>Satélite</option>
+            </select>
+          </p>
+          <h2>Metodos de Pesquisa</h2>
+          <p>
+            <label
+              ><input type="checkbox" id="fSantuario" checked="checked" /><i
+                class="fa fa-church"
+                style="color: black"
+              ></i>
+              Santuário</label
+            >
+          </p>
+          <p>
+            <label
+              ><input type="checkbox" id="fJardins" checked="checked" /><i
+                class="fas fa-tree"
+                style="color: green"
+              ></i>
+              Jardins</label
+            >
+          </p>
+          <p>
+            <label
+              ><input type="checkbox" id="fMonumentos" checked="checked" /><i
+                class="fas fa-landmark"
+                style="color: orange"
+              ></i>
+              Monumentos</label
+            >
+          </p>
+          <hr />
+          <p>
+            <label
+              ><input type="checkbox" id="fPontos" checked="checked" /><i
+                class="fas fa-map-pin"
+              ></i
+              >Pontos</label
+            >
+          </p>
+          <p>
+            <label
+              ><input type="checkbox" id="fLinhas" checked="checked" /><i
+                class="fas fa-grip-lines"
+              ></i
+              >Linhas</label
+            >
+          </p>
+          <p>
+            <label
+              ><input type="checkbox" id="fPoligonos" checked="checked" /><i
+                class="fas fa-draw-polygon"
+              ></i
+              >Polígonos</label
+            >
+          </p>
+        </div>
+        <div class="leaflet-sidebar-pane" id="logout">
+          <h1 class="leaflet-sidebar-header">
+            Sair
+            <span class="leaflet-sidebar-close"
+              ><i class="fa fa-sign-out-alt"></i
+            ></span>
+          </h1>
+          <p>Deseja sair da aplicação?</p>
+          <button id="blogout">Terminar sessão</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+      integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+      crossorigin=""
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <script src="leaflet-sidebar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.fullscreen/1.4.5/Control.FullScreen.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0"></script>
+    <script src="https://unpkg.com/leaflet-filelayer@1.2.0"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
