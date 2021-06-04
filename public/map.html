@@ -41,6 +41,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css"
     />
+
+    <link rel="stylesheet" href="modal.css" />
     <style>
       body {
         padding: 0;
@@ -63,6 +65,18 @@
       .awesome-marker i {
         font-size: 18px;
         margin-top: 8px;
+      }
+
+      .ml-4 {
+        margin-left: 4%;
+      }
+
+      .fa-plus-circle {
+        color: green;
+        cursor: pointer;
+      }
+      .fa-plus-circle:hover {
+        color: rgb(1, 165, 1);
       }
     </style>
   </head>
@@ -133,34 +147,10 @@
               <option>Satélite</option>
             </select>
           </p>
-          <h2>Metodos de Pesquisa</h2>
-          <p>
-            <label
-              ><input type="checkbox" id="fSantuario" checked="checked" /><i
-                class="fa fa-church"
-                style="color: black"
-              ></i>
-              Santuário</label
-            >
-          </p>
-          <p>
-            <label
-              ><input type="checkbox" id="fJardins" checked="checked" /><i
-                class="fas fa-tree"
-                style="color: green"
-              ></i>
-              Jardins</label
-            >
-          </p>
-          <p>
-            <label
-              ><input type="checkbox" id="fMonumentos" checked="checked" /><i
-                class="fas fa-landmark"
-                style="color: orange"
-              ></i>
-              Monumentos</label
-            >
-          </p>
+          <h2>
+            <span>Categorias</span><i class="fas fa-plus-circle ml-4"></i>
+          </h2>
+          <div class="container-categorias"></div>
           <hr />
           <p>
             <label
@@ -201,6 +191,46 @@
     </div>
 
     <div id="map"></div>
+
+    <!-- Modal add category -->
+    <div id="modal_categorias" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close-modal-categorias">&times;</span>
+          <h2>Adicionar Categoria</h2>
+        </div>
+        <div class="modal-body">
+          <form>
+            <span class="error">Preencha todos os campos</span>
+            <br />
+            <label for="nome">Nome:</label><br />
+            <input type="text" id="nome" name="nome" class="nome" /><br /><br />
+            <label for="tipo">Tipo:</label>
+            <select id="tipo" class="tipo">
+              <option>Ponto</option>
+              <option>Linha</option>
+              <option>Poligono</option></select
+            ><br /><br />
+            <label for="cor">Cor:</label><br />
+            <!-- <input type="color" id="cor" name="cor" class="cor" /><br /><br /> -->
+            <input type="color" id="cor" name="cor" class="cor" list="presetColors"><br /><br />
+            <datalist id="presetColors"> <!--Only shows this colors-->
+              <option>#ff0000</option>
+              <option>#8b0000</option>
+              <option>#ffa500</option>
+              <option>#008000</option>
+              <option>#006400</option>
+              <option>#0000ff</option>
+              <option>#800080</option>
+              <option>#660066</option>
+              <option>#5f9ea0</option>
+            </datalist>
+            <input type="submit" class="adicionar-categoria" value="Adicionar"></input>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <script
       src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"

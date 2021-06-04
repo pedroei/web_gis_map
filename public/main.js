@@ -1,4 +1,4 @@
-console.log(localStorage.getItem('login'));
+// console.log(localStorage.getItem('login'));
 var user = localStorage.getItem('login');
 var geojsonLayer;
 var caop;
@@ -192,31 +192,75 @@ var newPolygon = {
   latlngs: [],
 };
 
-map.on('draw:created', function (e) {
+map.on('draw:created', async (e) => {
   var type = e.layerType,
     layer = e.layer;
 
+  const raw = await fetch('http://localhost:5000/api/categorias');
+  const data = await raw.json();
+
   if (type === 'marker') {
     newMarker.latlng = layer._latlng;
+
+    let options_tipo_ponto = '';
+
+    data.forEach((cat) => {
+      if (cat.tipo === 'Ponto') {
+        options_tipo_ponto += `<option value="${cat.id}">${cat.nome}</option>`;
+      }
+    });
+
     L.popup()
       .setContent(
-        '<span><b>Nome do ponto</b></span><br/><input id="tipo" type="hidden" value="marker"><input id="shapeName" type="text"/><br/><br/><span><b>Descrição</b></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><span><b>Tipo</b></span><br/><select id="tipoP"><option>Santuário</option><option>Jardins</option><option>Monumentos</option></select><br/><br/><span><b>Imagem</b></span><br/><input type="file" id="imagem" accept="image/*"><br/><br/><input type="button" id="okBtn" value="Guardar" onclick="setInfo()"/>'
+        '<span><b>Nome do ponto</b></span><br/>' +
+          '<input id="tipo" type="hidden" value="marker">' +
+          '<input id="shapeName" type="text"/><br/><br/>' +
+          '<span><b>Descrição</b></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/>' +
+          '<span><b>Tipo</b></span><br/>' +
+          '<select id="tipoP">' +
+          options_tipo_ponto +
+          '</select>' +
+          '<br/><br/><span><b>Imagem</b></span><br/>' +
+          '<input type="file" id="imagem" accept="image/*"><br/><br/>' +
+          '<input type="button" id="okBtn" value="Guardar" onclick="setInfo()"/>'
       )
       .setLatLng(layer._latlng)
       .openOn(map);
   } else if (type === 'polygon') {
     newPolygon.latlngs = layer._latlngs[0];
+
+    let options_tipo_poligono = '';
+
+    data.forEach((cat) => {
+      if (cat.tipo === 'Poligono') {
+        options_tipo_poligono += `<option value="${cat.id}">${cat.nome}</option>`;
+      }
+    });
+
     L.popup()
       .setContent(
-        '<span><b>Nome da área</b></span><br/> <input id="tipo" type="hidden" value="polygon"><input id="shapeName" type="text" /><br /><br /><span><b>Descrição</b></span><br /><textarea id="shapeDesc" cols="25" rows="5"></textarea><br /><br /><span><b>Tipo</b></span><br /><select id="tipoP"><option>Santuário</option><option>Jardins</option><option>Monumentos</option></select><br /><br /><span><b>Imagem</b></span><br /><input type="file" id="imagem" accept="image/*"><br /><br /><input type="button" id="okBtn" value="Guardar" onclick="setInfo()" />'
+        '<span><b>Nome da área</b></span><br/> <input id="tipo" type="hidden" value="polygon"><input id="shapeName" type="text" /><br /><br /><span><b>Descrição</b></span><br /><textarea id="shapeDesc" cols="25" rows="5"></textarea><br /><br /><span><b>Tipo</b></span><br /><select id="tipoP">' +
+          options_tipo_poligono +
+          '</select><br /><br /><span><b>Imagem</b></span><br /><input type="file" id="imagem" accept="image/*"><br /><br /><input type="button" id="okBtn" value="Guardar" onclick="setInfo()" />'
       )
       .setLatLng(layer._latlngs[0][0])
       .openOn(map);
   } else if (type === 'polyline') {
     newLine.latlngs = layer._latlngs;
+
+    let options_tipo_linha = '';
+
+    data.forEach((cat) => {
+      if (cat.tipo === 'Linha') {
+        options_tipo_linha += `<option value="${cat.id}">${cat.nome}</option>`;
+      }
+    });
+
     L.popup()
       .setContent(
-        '<span><b>Nome da linha</b></span><br/> <input id="tipo" type="hidden" value="line"><input id="shapeName" type="text" /><br /><br /><span><b>Descrição</b></span><br /><textarea id="shapeDesc" cols="25" rows="5"></textarea><br /><br /><span><b>Tipo</b></span><br /><select id="tipoP"><option>Santuário</option><option>Jardins</option><option>Monumentos</option></select><br /><br /><span><b>Imagem</b></span><br /><input type="file" id="imagem" accept="image/*"><br /><br /><input type="button" id="okBtn" value="Guardar" onclick="setInfo()" />'
+        '<span><b>Nome da linha</b></span><br/> <input id="tipo" type="hidden" value="line"><input id="shapeName" type="text" /><br /><br /><span><b>Descrição</b></span><br /><textarea id="shapeDesc" cols="25" rows="5"></textarea><br /><br /><span><b>Tipo</b></span><br /><select id="tipoP">' +
+          options_tipo_linha +
+          '</select><br /><br /><span><b>Imagem</b></span><br /><input type="file" id="imagem" accept="image/*"><br /><br /><input type="button" id="okBtn" value="Guardar" onclick="setInfo()" />'
       )
       .setLatLng(layer._latlngs[0])
       .openOn(map);
@@ -329,7 +373,7 @@ function saveLine(hasImage) {
 
 function savePolygon(hasImage) {
   if (!hasImage) {
-    newPolygon.imagem = 'images/default.png';
+    newPolygon.imagem = 'default.png';
     fetch('http://localhost:5000/api/polygon', {
       headers: {
         'Content-Type': 'application/json',
@@ -382,7 +426,10 @@ function deleteGeo(id, path) {
   getData();
 }
 
-function getData() {
+async function getData() {
+  const raw = await fetch('http://localhost:5000/api/categorias');
+  const allCategorias = await raw.json();
+
   if (geojsonLayer) {
     geojsonLayer.remove();
   }
@@ -393,17 +440,22 @@ function getData() {
     .then((geojson) => {
       if (geojson.features !== null) {
         geojsonLayer = L.geoJSON(geojson, {
-          onEachFeature: function (feature, layer) {
+          onEachFeature: async function (feature, layer) {
+            // const categoria = await getCategoriaID(feature.properties.f4);
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            );
+
             if (feature.geometry.type === 'Point') {
               if (user === 'convidado') {
                 var pop = L.popup().setContent(
-                  `<span><b>Nome do ponto</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                  `<span><b>Nome do ponto</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300" />
               </br>`
                 );
               } else {
                 var pop = L.popup().setContent(
-                  `<span><b>Nome do ponto</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                  `<span><b>Nome do ponto</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300" />
               </br>
               <input type="button" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
@@ -412,13 +464,13 @@ function getData() {
             } else if (feature.geometry.type === 'Polygon') {
               if (user === 'convidado') {
                 var pop = L.popup().setContent(
-                  `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                  `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>`
                 );
               } else {
                 var pop = L.popup().setContent(
-                  `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                  `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>
               <input type="button" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
@@ -427,13 +479,13 @@ function getData() {
             } else if (feature.geometry.type === 'LineString') {
               if (user === 'convidado') {
                 var pop = L.popup().setContent(
-                  `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                  `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>`
                 );
               } else {
                 var pop = L.popup().setContent(
-                  `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                  `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>
               <input type="button" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
@@ -443,145 +495,126 @@ function getData() {
             layer.bindPopup(pop);
           },
           pointToLayer: function (feature, latlng) {
-            var iconSantuario = L.AwesomeMarkers.icon({
-              icon: 'church',
-              prefix: 'fa',
-              markerColor: 'black',
-            });
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            )[0];
 
-            var iconJardins = L.AwesomeMarkers.icon({
-              icon: 'tree',
-              prefix: 'fa',
-              markerColor: 'green',
+            return L.marker(latlng, {
+              icon: L.AwesomeMarkers.icon({
+                icon: 'info-circle',
+                prefix: 'fa',
+                markerColor: categoria.cor,
+              }),
             });
-
-            var iconMonumentos = L.AwesomeMarkers.icon({
-              icon: 'landmark',
-              prefix: 'fa',
-              markerColor: 'orange',
-            });
-
-            switch (feature.properties.f4) {
-              case 'Santuário':
-                return L.marker(latlng, { icon: iconSantuario });
-              case 'Jardins':
-                return L.marker(latlng, { icon: iconJardins });
-              case 'Monumentos':
-                return L.marker(latlng, { icon: iconMonumentos });
-            }
           },
           style: function (feature) {
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            )[0];
             if (
               feature.geometry.type === 'Polygon' ||
               feature.geometry.type === 'LineString'
             ) {
-              switch (feature.properties.f4) {
-                case 'Santuário':
-                  return { color: 'black' };
-                case 'Jardins':
-                  return { color: 'green' };
-                case 'Monumentos':
-                  return { color: 'orange' };
-              }
+              return { color: categoria.cor };
             }
           },
-          filter: function (feature, layer) {
-            var tipo = feature.properties.f4;
-            var geo = feature.geometry.type;
+          // filter: function (feature, layer) {
+          //   var tipo = feature.properties.f4;
+          //   var geo = feature.geometry.type;
 
-            switch (tipo) {
-              case 'Santuário':
-                switch (geo) {
-                  case 'Point':
-                    if (
-                      $('#fSantuario').is(':checked') &&
-                      $('#fPontos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'Polygon':
-                    if (
-                      $('#fSantuario').is(':checked') &&
-                      $('#fPoligonos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'LineString':
-                    if (
-                      $('#fSantuario').is(':checked') &&
-                      $('#fLinhas').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                }
-              case 'Jardins':
-                switch (geo) {
-                  case 'Point':
-                    if (
-                      $('#fJardins').is(':checked') &&
-                      $('#fPontos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'Polygon':
-                    if (
-                      $('#fJardins').is(':checked') &&
-                      $('#fPoligonos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'LineString':
-                    if (
-                      $('#fJardins').is(':checked') &&
-                      $('#fLinhas').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                }
-              case 'Monumentos':
-                switch (geo) {
-                  case 'Point':
-                    if (
-                      $('#fMonumentos').is(':checked') &&
-                      $('#fPontos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'Polygon':
-                    if (
-                      $('#fMonumentos').is(':checked') &&
-                      $('#fPoligonos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'LineString':
-                    if (
-                      $('#fMonumentos').is(':checked') &&
-                      $('#fLinhas').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                }
-            }
-          },
+          //   switch (tipo) {
+          //     case 'Santuário':
+          //       switch (geo) {
+          //         case 'Point':
+          //           if (
+          //             $('#fSantuario').is(':checked') &&
+          //             $('#fPontos').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //         case 'Polygon':
+          //           if (
+          //             $('#fSantuario').is(':checked') &&
+          //             $('#fPoligonos').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //         case 'LineString':
+          //           if (
+          //             $('#fSantuario').is(':checked') &&
+          //             $('#fLinhas').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //       }
+          //     case 'Jardins':
+          //       switch (geo) {
+          //         case 'Point':
+          //           if (
+          //             $('#fJardins').is(':checked') &&
+          //             $('#fPontos').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //         case 'Polygon':
+          //           if (
+          //             $('#fJardins').is(':checked') &&
+          //             $('#fPoligonos').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //         case 'LineString':
+          //           if (
+          //             $('#fJardins').is(':checked') &&
+          //             $('#fLinhas').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //       }
+          //     case 'Monumentos':
+          //       switch (geo) {
+          //         case 'Point':
+          //           if (
+          //             $('#fMonumentos').is(':checked') &&
+          //             $('#fPontos').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //         case 'Polygon':
+          //           if (
+          //             $('#fMonumentos').is(':checked') &&
+          //             $('#fPoligonos').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //         case 'LineString':
+          //           if (
+          //             $('#fMonumentos').is(':checked') &&
+          //             $('#fLinhas').is(':checked')
+          //           ) {
+          //             return true;
+          //           } else {
+          //             return false;
+          //           }
+          //       }
+          //   }
+          // },
         }).addTo(map);
       }
     });
@@ -974,3 +1007,112 @@ function getBuffer(raio) {
       }
     });
 }
+
+//modal categorias
+const modal = document.getElementById('modal_categorias');
+const btn = document.querySelector('.fa-plus-circle');
+const span = document.querySelector('.close-modal-categorias');
+
+//modal form
+const btnAdd = document.querySelector('.adicionar-categoria');
+
+const formNome = document.querySelector('.nome');
+const formTipo = document.querySelector('.tipo');
+const formCor = document.querySelector('.cor');
+
+const error = document.querySelector('.error');
+
+// When the user clicks on the button, open the modal
+btn.onclick = function () {
+  modal.style.display = 'block';
+};
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function () {
+  modal.style.display = 'none';
+};
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function (event) {
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+};
+
+btnAdd.onclick = async (e) => {
+  e.preventDefault();
+  if (formNome.value === '') {
+    return (error.style.visibility = 'visible');
+  }
+
+  const color = hexToName(formCor.value);
+
+  const raw = await fetch('http://localhost:5000/api/categoria', {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      nome: formNome.value,
+      tipo: formTipo.value,
+      cor: color,
+    }),
+  });
+
+  const data = await raw.json();
+
+  if (data === 'success') {
+    alert('Categoria adicionada');
+    formNome.value = '';
+    formTipo.value = 'Ponto';
+    formCor.value = '#000000';
+    error.style.visibility = 'hidden';
+    modal.style.display = 'none';
+    getCategoriasInLayers();
+  } else {
+    alert('Erro ao adicionar categoria');
+  }
+};
+
+const containerCategorias = document.querySelector('.container-categorias');
+
+const getCategoriasInLayers = async () => {
+  const raw = await fetch('http://localhost:5000/api/categorias');
+  const data = await raw.json();
+
+  containerCategorias.innerHTML = '';
+  data.forEach((cat) => {
+    containerCategorias.innerHTML += `
+      <p style="display: flex; justify-content: space-between;">
+      <label
+        ><input type="checkbox" id="${cat.nome}Cat" checked="checked" />
+        <i class="fa fa-map-marker-alt" style="color: ${cat.cor}"></i>
+        ${cat.nome}</label
+      >      
+      <i class="fas fa-trash" style="color: red; cursor: pointer"></i>
+      </p>
+      `;
+  });
+};
+
+//TODO: DELETE Categoria
+//TODO: Finish filter
+//TODO: Calcular area/comprimento/distancia_2pontos
+getCategoriasInLayers();
+
+const hexToName = (hex) => {
+  if (hex === '#ff0000') return 'red';
+  if (hex === '#8b0000') return 'darkred';
+  if (hex === '#ffa500') return 'orange';
+  if (hex === '#008000') return 'green';
+  if (hex === '#006400') return 'darkgreen';
+  if (hex === '#0000ff') return 'blue';
+  if (hex === '#800080') return 'purple';
+  if (hex === '#660066') return 'darkpurple';
+  if (hex === '#5f9ea0') return 'cadetblue';
+};
+
+const getCategoriaID = async (id) => {
+  const raw = await fetch('http://localhost:5000/api/categorias/' + id);
+  return await raw.json();
+};

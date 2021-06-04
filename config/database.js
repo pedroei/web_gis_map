@@ -118,3 +118,31 @@ module.exports.delete = (id) => {
     }
   });
 };
+
+module.exports.addCategoria = (categoria) => {
+  const query = `INSERT INTO categorias(nome, cor, tipo)
+    VALUES (
+      '${categoria.nome}', 
+      '${categoria.cor}', 
+      '${categoria.tipo}'
+      );`;
+  client.query(query, function (err, result) {
+    if (err) {
+      throw err;
+    } else {
+      return 'success';
+    }
+  });
+};
+
+module.exports.getCategorias = async () => {
+  const query = 'SELECT * FROM categorias';
+  const result = await client.query(query);
+  return result.rows;
+};
+
+module.exports.getCategoriaById = async (id) => {
+  const query = 'SELECT * FROM categorias WHERE id=' + id;
+  const result = await client.query(query);
+  return result.rows;
+};
