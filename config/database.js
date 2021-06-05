@@ -146,3 +146,18 @@ module.exports.getCategoriaById = async (id) => {
   const result = await client.query(query);
   return result.rows;
 };
+
+module.exports.deleteCategoria = async (id) => {
+  const query = 'DELETE FROM categorias WHERE id=' + id;
+  await client.query(query, function (err, result) {
+    if (err) {
+      throw err;
+    }
+  });
+};
+
+module.exports.getAreasCategoria = async (id) => {
+  const query = 'SELECT * FROM areas WHERE tipo=' + id;
+  const result = await client.query(query);
+  return result.rows;
+};

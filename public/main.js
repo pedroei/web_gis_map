@@ -518,103 +518,112 @@ async function getData() {
               return { color: categoria.cor };
             }
           },
-          // filter: function (feature, layer) {
-          //   var tipo = feature.properties.f4;
-          //   var geo = feature.geometry.type;
+          filter: function (feature, layer) {
+            const idCategoria = feature.properties.f4;
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            )[0];
+            const geo = feature.geometry.type;
+            console.log(geo, idCategoria, categoria);
+            //Filter by:
+            //- Categorias
+            //-Ponto
+            //-Linha
+            //-Poligono
 
-          //   switch (tipo) {
-          //     case 'Santuário':
-          //       switch (geo) {
-          //         case 'Point':
-          //           if (
-          //             $('#fSantuario').is(':checked') &&
-          //             $('#fPontos').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //         case 'Polygon':
-          //           if (
-          //             $('#fSantuario').is(':checked') &&
-          //             $('#fPoligonos').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //         case 'LineString':
-          //           if (
-          //             $('#fSantuario').is(':checked') &&
-          //             $('#fLinhas').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //       }
-          //     case 'Jardins':
-          //       switch (geo) {
-          //         case 'Point':
-          //           if (
-          //             $('#fJardins').is(':checked') &&
-          //             $('#fPontos').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //         case 'Polygon':
-          //           if (
-          //             $('#fJardins').is(':checked') &&
-          //             $('#fPoligonos').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //         case 'LineString':
-          //           if (
-          //             $('#fJardins').is(':checked') &&
-          //             $('#fLinhas').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //       }
-          //     case 'Monumentos':
-          //       switch (geo) {
-          //         case 'Point':
-          //           if (
-          //             $('#fMonumentos').is(':checked') &&
-          //             $('#fPontos').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //         case 'Polygon':
-          //           if (
-          //             $('#fMonumentos').is(':checked') &&
-          //             $('#fPoligonos').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //         case 'LineString':
-          //           if (
-          //             $('#fMonumentos').is(':checked') &&
-          //             $('#fLinhas').is(':checked')
-          //           ) {
-          //             return true;
-          //           } else {
-          //             return false;
-          //           }
-          //       }
-          //   }
-          // },
+            //   switch (tipo) {
+            //     case 'Santuário':
+            //       switch (geo) {
+            //         case 'Point':
+            //           if (
+            //             $('#fSantuario').is(':checked') &&
+            //             $('#fPontos').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //         case 'Polygon':
+            //           if (
+            //             $('#fSantuario').is(':checked') &&
+            //             $('#fPoligonos').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //         case 'LineString':
+            //           if (
+            //             $('#fSantuario').is(':checked') &&
+            //             $('#fLinhas').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //       }
+            //     case 'Jardins':
+            //       switch (geo) {
+            //         case 'Point':
+            //           if (
+            //             $('#fJardins').is(':checked') &&
+            //             $('#fPontos').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //         case 'Polygon':
+            //           if (
+            //             $('#fJardins').is(':checked') &&
+            //             $('#fPoligonos').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //         case 'LineString':
+            //           if (
+            //             $('#fJardins').is(':checked') &&
+            //             $('#fLinhas').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //       }
+            //     case 'Monumentos':
+            //       switch (geo) {
+            //         case 'Point':
+            //           if (
+            //             $('#fMonumentos').is(':checked') &&
+            //             $('#fPontos').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //         case 'Polygon':
+            //           if (
+            //             $('#fMonumentos').is(':checked') &&
+            //             $('#fPoligonos').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //         case 'LineString':
+            //           if (
+            //             $('#fMonumentos').is(':checked') &&
+            //             $('#fLinhas').is(':checked')
+            //           ) {
+            //             return true;
+            //           } else {
+            //             return false;
+            //           }
+            //       }
+            //   }
+          },
         }).addTo(map);
       }
     });
@@ -1079,23 +1088,24 @@ const containerCategorias = document.querySelector('.container-categorias');
 const getCategoriasInLayers = async () => {
   const raw = await fetch('http://localhost:5000/api/categorias');
   const data = await raw.json();
+  console.log(data);
 
   containerCategorias.innerHTML = '';
   data.forEach((cat) => {
     containerCategorias.innerHTML += `
       <p style="display: flex; justify-content: space-between;">
       <label
-        ><input type="checkbox" id="${cat.nome}Cat" checked="checked" />
+        ><input type="checkbox" id="${cat.nome}${cat.id}" checked="checked" />
         <i class="fa fa-map-marker-alt" style="color: ${cat.cor}"></i>
         ${cat.nome}</label
       >      
-      <i class="fas fa-trash" style="color: red; cursor: pointer"></i>
+      <i class="fas fa-trash" style="color: red; cursor: pointer" 
+      onclick="deleteCategoria(${cat.id})"></i>
       </p>
       `;
   });
 };
 
-//TODO: DELETE Categoria
 //TODO: Finish filter
 //TODO: Calcular area/comprimento/distancia_2pontos
 getCategoriasInLayers();
@@ -1115,4 +1125,22 @@ const hexToName = (hex) => {
 const getCategoriaID = async (id) => {
   const raw = await fetch('http://localhost:5000/api/categorias/' + id);
   return await raw.json();
+};
+
+const deleteCategoria = async (id) => {
+  try {
+    const raw = await fetch('http://localhost:5000/api/areas/categoria/' + id);
+    const data = await raw.json();
+
+    if (data.length === 0) {
+      await fetch('http://localhost:5000/api/categorias/' + id, {
+        method: 'DELETE',
+      });
+      getCategoriasInLayers();
+    } else {
+      alert('Esta categoria está associada a alguma area');
+    }
+  } catch (e) {
+    console.log(e);
+  }
 };

@@ -103,4 +103,24 @@ router.get('/categorias/:id', async (req, res) => {
   }
 });
 
+router.delete('/categorias/:id', async (req, res) => {
+  const idCategoria = req.params.id;
+  try {
+    await db.deleteCategoria(idCategoria);
+    res.send('ok');
+  } catch (error) {
+    throw error;
+  }
+});
+
+router.get('/areas/categoria/:id', async (req, res) => {
+  const idCategoria = req.params.id;
+  try {
+    const data = await db.getAreasCategoria(idCategoria);
+    res.json(data);
+  } catch (error) {
+    throw error;
+  }
+});
+
 module.exports = router;
