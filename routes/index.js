@@ -123,4 +123,24 @@ router.get('/areas/categoria/:id', async (req, res) => {
   }
 });
 
+router.get('/areas/pontos', async (req, res) => {
+  try {
+    const data = await db.getAllPontos();
+    res.json(data);
+  } catch (error) {
+    throw error;
+  }
+});
+
+router.get('/distancia/:idPonto1/:idPonto2', async (req, res) => {
+  const idPonto1 = req.params.idPonto1;
+  const idPonto2 = req.params.idPonto2;
+  try {
+    const data = await db.getDistancia2Pontos(idPonto1, idPonto2);
+    res.json(data);
+  } catch (error) {
+    throw error;
+  }
+});
+
 module.exports = router;

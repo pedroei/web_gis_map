@@ -105,15 +105,6 @@
 
       <!-- panel content -->
       <div class="leaflet-sidebar-content">
-        <!-- <div class="leaflet-sidebar-pane" id="home">
-          <h1 class="leaflet-sidebar-header">
-            Leaflet-IS
-            <span class="leaflet-sidebar-close"
-              ><i class="fa fa-caret-left"></i
-            ></span>
-          </h1>
-        </div> -->
-
         <div class="leaflet-sidebar-pane" id="search">
           <h1 class="leaflet-sidebar-header">
             Pesquisar
@@ -132,6 +123,9 @@
             <button id="btnLimites">Apresentar Limites</button>
             <button id="btnLimitesR">Retirar Limites</button>
           </p>
+          <hr />
+          <h2>Calcular Distancia entre 2 Pontos</h2>
+          <p><button id="btnDistanciaPontos">Distancia entre 2 pontos</button></p>
         </div>
 
         <div class="leaflet-sidebar-pane" id="layers">
@@ -231,6 +225,37 @@
         </div>
       </div>
     </div>
+
+        <!-- Modal add category -->
+        <div id="modal_distancia_pontos" class="modal">
+          <!-- Modal content -->
+          <div class="modal-content">
+            <div class="modal-header">
+              <span class="close-modal-distancia-pontos">&times;</span>
+              <h2>Calcular distancia entre 2 pontos</h2>
+            </div>
+            <div class="modal-body">
+              <form>
+                <label class="label-select-ponto" for="ponto_1">Escolha o ponto 1: </label>
+                <select class="select-ponto" name="ponto_1" id="ponto_1_select">
+                  <option value="volvo">Isto</option>
+                  <option value="saab">Aquilo</option>
+                </select>
+                <br><br>
+                <label class="label-select-ponto" for="ponto_2">Escolha o ponto 2: </label>
+                <select class="select-ponto" name="ponto_2" id="ponto_2_select">
+                  <option value="volvo">Volvo</option>
+                  <option value="saab">Saab</option>
+                  <option value="opel">Opel</option>
+                </select>
+                <br><br>
+                <span class="distancia-entre-pontos"></span>
+                <br><br>
+                <input type="submit" class="calcular-distancia" value="Calcular">
+              </form>
+            </div>
+          </div>
+        </div>
 
     <script
       src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"

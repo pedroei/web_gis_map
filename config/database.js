@@ -35,8 +35,8 @@ module.exports.register = async (body) => {
 };
 
 module.exports.addMarker = (marker) => {
-  const query = `INSERT INTO areas(titulo, descricao, geom, tipo, imagem) 
-                    VALUES('${marker.nome}', '${marker.desc}', ST_GeomFromText('POINT(${marker.latlng.lng} ${marker.latlng.lat})', 4326), '${marker.tipo}', '${marker.imagem}')`;
+  const query = `INSERT INTO areas(titulo, descricao, geom, tipo, imagem, tamanho_area) 
+                    VALUES('${marker.nome}', '${marker.desc}', ST_GeomFromText('POINT(${marker.latlng.lng} ${marker.latlng.lat})', 4326), '${marker.tipo}', '${marker.imagem}', null)`;
 
   client.query(query, function (err, result) {
     if (err) {
@@ -48,8 +48,14 @@ module.exports.addMarker = (marker) => {
 };
 
 module.exports.addLine = (line) => {
-  const query = `INSERT INTO areas(titulo, descricao, geom, tipo, imagem)
-                    VALUES('${line.nome}', '${line.desc}', ST_GeomFromText('LINESTRING(${line.latlngs[0].lng} ${line.latlngs[0].lat}, ${line.latlngs[1].lng} ${line.latlngs[1].lat})', 4326), '${line.tipo}', '${line.imagem}')`;
+  const query = `INSERT INTO areas(titulo, descricao, geom, tipo, imagem, tamanho_area)
+                    VALUES('${line.nome}', 
+                      '${line.desc}', 
+                      ST_GeomFromText('LINESTRING(${line.latlngs[0].lng} ${line.latlngs[0].lat}, ${line.latlngs[1].lng} ${line.latlngs[1].lat})', 4326), 
+                      '${line.tipo}', 
+                      '${line.imagem}',
+                      ST_LENGTH((ST_GeomFromText('LINESTRING(${line.latlngs[0].lng} ${line.latlngs[0].lat}, ${line.latlngs[1].lng} ${line.latlngs[1].lat})', 4326))::geography)
+                      )`;
 
   client.query(query, function (err, result) {
     if (err) {
@@ -70,8 +76,14 @@ module.exports.addPolygon = (polygon) => {
       vertices += polygon.latlngs[0].lat;
     }
   }
-  const query = `INSERT INTO areas(titulo, descricao, geom, tipo, imagem) 
-                    VALUES('${polygon.nome}', '${polygon.desc}', ST_GeometryFromText('POLYGON((${vertices}))', 4326), '${polygon.tipo}', '${polygon.imagem}')`;
+  const query = `INSERT INTO areas(titulo, descricao, geom, tipo, imagem, tamanho_area) 
+                    VALUES('${polygon.nome}',
+                     '${polygon.desc}', 
+                     ST_GeometryFromText('POLYGON((${vertices}))', 4326), 
+                     '${polygon.tipo}', 
+                     '${polygon.imagem}',
+                     ST_Area((ST_GeometryFromText('POLYGON((${vertices}))', 4326))::geography)
+                     )`;
   client.query(query, function (err, result) {
     if (err) {
       console.log(err);
@@ -83,7 +95,7 @@ module.exports.addPolygon = (polygon) => {
 
 module.exports.getData = async () => {
   const query =
-    "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(areas.geom)::json As geometry, row_to_json((id, titulo, descricao, tipo, imagem)) As properties FROM areas) As f) As fc";
+    "SELECT row_to_json(fc) FROM ( SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM (SELECT 'Feature' As type, ST_AsGeoJSON(areas.geom)::json As geometry, row_to_json((id, titulo, descricao, tipo, imagem, tamanho_area)) As properties FROM areas) As f) As fc";
   const result = await client.query(query);
   return result.rows[0].row_to_json;
 };
@@ -96,14 +108,14 @@ module.exports.getMapa = async () => {
 };
 
 module.exports.getCaop = async (local) => {
-  const query = `SELECT row_to_json(fc) FROM (SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM(SELECT 'Feature' As type, ST_AsGeoJSON(areas.geom):: json As geometry,row_to_json((areas.id, titulo, descricao, tipo, imagem)) As properties FROM caop, areas WHERE ST_Intersects(areas.geom, caop.geom) AND lower(caop.lug11desig) LIKE '%${local}%') As f) As fc`;
+  const query = `SELECT row_to_json(fc) FROM (SELECT 'FeatureCollection' As type, array_to_json(array_agg(f)) As features FROM(SELECT 'Feature' As type, ST_AsGeoJSON(areas.geom):: json As geometry,row_to_json((areas.id, titulo, descricao, tipo, imagem, tamanho_area)) As properties FROM caop, areas WHERE ST_Intersects(areas.geom, caop.geom) AND lower(caop.lug11desig) LIKE '%${local}%') As f) As fc`;
   const result = await client.query(query);
   return result.rows[0].row_to_json;
 };
 
 module.exports.getBuffer = async (raio) => {
   raio = raio * 0.00001;
-  const query = `SELECT row_to_json(fc) FROM (SELECT 'FeatureCollection' As type, ST_AsGeoJSON((select ST_BUFFER(geom, ${raio}) FROM areas where id = 94)):: json As buffer, array_to_json(array_agg(f)) As features FROM(SELECT 'Feature' As type, ST_AsGeoJSON(areas.geom):: json As geometry,row_to_json((id, titulo, descricao, tipo, imagem)) As properties FROM areas WHERE ST_Intersects(geom, (select ST_BUFFER(geom, ${raio}) FROM areas where id = 94))) As f) As fc`;
+  const query = `SELECT row_to_json(fc) FROM (SELECT 'FeatureCollection' As type, ST_AsGeoJSON((select ST_BUFFER(geom, ${raio}) FROM areas where id = 94)):: json As buffer, array_to_json(array_agg(f)) As features FROM(SELECT 'Feature' As type, ST_AsGeoJSON(areas.geom):: json As geometry,row_to_json((id, titulo, descricao, tipo, imagem, tamanho_area)) As properties FROM areas WHERE ST_Intersects(geom, (select ST_BUFFER(geom, ${raio}) FROM areas where id = 94))) As f) As fc`;
   const result = await client.query(query);
   return result.rows[0].row_to_json;
 };
@@ -158,6 +170,25 @@ module.exports.deleteCategoria = async (id) => {
 
 module.exports.getAreasCategoria = async (id) => {
   const query = 'SELECT * FROM areas WHERE tipo=' + id;
+  const result = await client.query(query);
+  return result.rows;
+};
+
+module.exports.getAllPontos = async () => {
+  const query =
+    "SELECT * FROM areas WHERE tipo = (SELECT id FROM categorias WHERE tipo = 'Ponto')";
+  const result = await client.query(query);
+  return result.rows;
+};
+
+module.exports.getDistancia2Pontos = async (idPonto1, idPonto2) => {
+  const query = `SELECT ST_Distance(
+    (
+      (SELECT geom FROM areas WHERE id = ${idPonto1})::geography
+    ), 
+    (
+        (SELECT geom FROM areas WHERE id = ${idPonto2})::geography
+    ));`;
   const result = await client.query(query);
   return result.rows;
 };

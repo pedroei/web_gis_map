@@ -433,7 +433,6 @@ async function getData() {
             const categoria = allCategorias.filter(
               (c) => c.id === feature.properties.f4
             );
-
             if (feature.geometry.type === 'Point') {
               if (user === 'convidado') {
                 var pop = L.popup().setContent(
@@ -450,31 +449,37 @@ async function getData() {
                 );
               }
             } else if (feature.geometry.type === 'Polygon') {
+              const area = Math.floor(feature.properties.f6 * 100) / 100;
               if (user === 'convidado') {
                 var pop = L.popup().setContent(
                   `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
-              <img src="${feature.properties.f5}" height="200" width="300"/>
+                  <span><b>Area:</b></span><br/><span>${area} m2</span><br/><br/>
+                  <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>`
                 );
               } else {
                 var pop = L.popup().setContent(
                   `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
-              <img src="${feature.properties.f5}" height="200" width="300"/>
+                  <span><b>Area:</b></span><br/><span>${area} m2</span><br/><br/>
+                  <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>
               <input type="button" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
                 );
               }
             } else if (feature.geometry.type === 'LineString') {
+              const tamanho = Math.floor(feature.properties.f6 * 100) / 100;
               if (user === 'convidado') {
                 var pop = L.popup().setContent(
                   `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
-              <img src="${feature.properties.f5}" height="200" width="300"/>
+                  <span><b>Tamanho:</b></span><br/><span>${tamanho} m</span><br/><br/>
+                  <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>`
                 );
               } else {
                 var pop = L.popup().setContent(
                   `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
-              <img src="${feature.properties.f5}" height="200" width="300"/>
+                  <span><b>Tamanho:</b></span><br/><span>${tamanho} m</span><br/><br/>
+                  <img src="${feature.properties.f5}" height="200" width="300"/>
               </br>
               <input type="button" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
                 );
@@ -886,13 +891,6 @@ span.onclick = function () {
   modal.style.display = 'none';
 };
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-  if (event.target == modal) {
-    modal.style.display = 'none';
-  }
-};
-
 btnAdd.onclick = async (e) => {
   e.preventDefault();
   if (formNome.value === '') {
@@ -950,7 +948,6 @@ const getCategoriasInLayers = async () => {
   });
 };
 
-//TODO: Calcular area/comprimento/distancia_2pontos
 getCategoriasInLayers();
 
 const hexToName = (hex) => {
@@ -985,5 +982,76 @@ const deleteCategoria = async (id) => {
     }
   } catch (e) {
     console.log(e);
+  }
+};
+
+const btnDistanciaPontos = document.querySelector('#btnDistanciaPontos');
+const modalDistancia = document.getElementById('modal_distancia_pontos');
+const spanCloseModalDistancia = document.querySelector(
+  '.close-modal-distancia-pontos'
+);
+
+const selectPonto1 = document.querySelector('#ponto_1_select');
+const selectPonto2 = document.querySelector('#ponto_2_select');
+const btnCalcular = document.querySelector('.calcular-distancia');
+
+const calculoFinal = document.querySelector('.distancia-entre-pontos');
+
+btnDistanciaPontos.onclick = (e) => {
+  e.preventDefault();
+  modalDistancia.style.display = 'block';
+  getInfoPontos();
+};
+
+spanCloseModalDistancia.onclick = function () {
+  modalDistancia.style.display = 'none';
+};
+
+window.onclick = function (event) {
+  // this event takes care of 2 modals
+  if (event.target == modalDistancia) {
+    modalDistancia.style.display = 'none';
+  }
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+};
+
+const getInfoPontos = async () => {
+  try {
+    const raw = await fetch('http://localhost:5000/api/areas/pontos');
+    const data = await raw.json();
+
+    selectPonto1.innerHTML = '';
+    selectPonto2.innerHTML = '';
+    calculoFinal.innerHTML = '';
+
+    data.forEach((ponto) => {
+      selectPonto1.innerHTML += `<option value="${ponto.id}">${ponto.titulo}</option>`;
+      selectPonto2.innerHTML += `<option value="${ponto.id}">${ponto.titulo}</option>`;
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+btnCalcular.onclick = async (e) => {
+  e.preventDefault();
+  const idPonto1 = selectPonto1.value;
+  const idPonto2 = selectPonto2.value;
+
+  try {
+    const raw = await fetch(
+      'http://localhost:5000/api/distancia/' + idPonto1 + '/' + idPonto2
+    );
+    const data = await raw.json();
+    const distanciaFinalMetros = Math.floor(data[0].st_distance * 100) / 100;
+    const distanciaFinalKm =
+      Math.floor((data[0].st_distance / 1000) * 100) / 100;
+
+    calculoFinal.innerHTML = `${distanciaFinalMetros} metros - ${distanciaFinalKm} km`;
+    console.log(idPonto1, idPonto2, distanciaFinalMetros);
+  } catch (error) {
+    console.log(error);
   }
 };

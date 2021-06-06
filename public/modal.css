@@ -53,7 +53,8 @@
 }
 
 /* The Close Button */
-.close-modal-categorias {
+.close-modal-categorias,
+.close-modal-distancia-pontos {
   color: white;
   float: right;
   font-size: 28px;
@@ -61,7 +62,9 @@
 }
 
 .close-modal-categorias:hover,
-.close-modal-categorias:focus {
+.close-modal-categorias:focus,
+.close-modal-distancia-pontos:hover,
+.close-modal-distancia-pontos:focus {
   color: #000;
   text-decoration: none;
   cursor: pointer;
@@ -106,7 +109,8 @@
   border-radius: 4px;
 }
 
-.adicionar-categoria {
+.adicionar-categoria,
+.calcular-distancia {
   width: 100%;
   background-color: #0074d9;
   color: white;
@@ -117,11 +121,26 @@
   cursor: pointer;
 }
 
-.adicionar-categoria:hover {
+.adicionar-categoria:hover,
+.calcular-distancia:hover {
   background-color: #0066be;
 }
 
 .error {
   color: red;
   visibility: hidden;
+}
+
+.select-ponto {
+  width: 30%;
+  min-height: 30px;
+  font-size: 16px;
+}
+
+.label-select-ponto {
+  font-size: 17px;
+}
+
+.distancia-entre-pontos {
+  font-size: 15px;
 }
