@@ -510,7 +510,6 @@ async function getData() {
             const categoria = allCategorias.filter(
               (c) => c.id === feature.properties.f4
             )[0];
-            const tipo = feature.properties.f4;
             const geo = feature.geometry.type;
 
             switch (geo) {
@@ -590,20 +589,20 @@ async function getCaop(local) {
 
             if (feature.geometry.type === 'Point') {
               var pop = L.popup().setContent(
-                `<span><b>Nome do ponto</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                `<span><b>Nome do ponto</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300" />
               </br>
               <input type="button" id="okBtn" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
               );
             } else if (feature.geometry.type === 'Polygon') {
               var pop = L.popup().setContent(
-                `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                `<span><b>Nome da área</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300"/>
               <input type="button" id="okBtn" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
               );
             } else if (feature.geometry.type === 'LineString') {
               var pop = L.popup().setContent(
-                `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${feature.properties.f4}</span><br/><br/>
+                `<span><b>Nome da linha</b></span><br/><span>${feature.properties.f2}</span><br/><br/><span><b>Descrição</b></span><br/><span>${feature.properties.f3}</span><br/><br/><span><b>Tipo</b></span><br/><span>${categoria[0].nome}</span><br/><br/>
               <img src="${feature.properties.f5}" height="200" width="300"/>
               <input type="button" id="okBtn" value="Apagar" onclick="deleteGeo(${feature.properties.f1}, \'${feature.properties.f5}\')"/>`
               );
@@ -611,142 +610,62 @@ async function getCaop(local) {
             layer.bindPopup(pop);
           },
           pointToLayer: function (feature, latlng) {
-            var iconSantuario = L.AwesomeMarkers.icon({
-              icon: 'church',
-              prefix: 'fa',
-              markerColor: 'black',
-            });
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            )[0];
 
-            var iconJardins = L.AwesomeMarkers.icon({
-              icon: 'tree',
-              prefix: 'fa',
-              markerColor: 'green',
+            return L.marker(latlng, {
+              icon: L.AwesomeMarkers.icon({
+                icon: 'info-circle',
+                prefix: 'fa',
+                markerColor: categoria.cor,
+              }),
             });
-
-            var iconMonumentos = L.AwesomeMarkers.icon({
-              icon: 'landmark',
-              prefix: 'fa',
-              markerColor: 'orange',
-            });
-
-            switch (feature.properties.f4) {
-              case 'Santuário':
-                return L.marker(latlng, { icon: iconSantuario });
-              case 'Jardins':
-                return L.marker(latlng, { icon: iconJardins });
-              case 'Monumentos':
-                return L.marker(latlng, { icon: iconMonumentos });
-            }
           },
           style: function (feature) {
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            )[0];
             if (
               feature.geometry.type === 'Polygon' ||
               feature.geometry.type === 'LineString'
             ) {
-              switch (feature.properties.f4) {
-                case 'Santuário':
-                  return { color: 'black' };
-                case 'Jardins':
-                  return { color: 'green' };
-                case 'Monumentos':
-                  return { color: 'orange' };
-              }
+              return { color: categoria.cor };
             }
           },
           filter: function (feature, layer) {
-            var tipo = feature.properties.f4;
-            var geo = feature.geometry.type;
+            const categoria = allCategorias.filter(
+              (c) => c.id === feature.properties.f4
+            )[0];
+            const geo = feature.geometry.type;
 
-            switch (tipo) {
-              case 'Santuário':
-                switch (geo) {
-                  case 'Point':
-                    if (
-                      $('#fSantuario').is(':checked') &&
-                      $('#fPontos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'Polygon':
-                    if (
-                      $('#fSantuario').is(':checked') &&
-                      $('#fPoligonos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'LineString':
-                    if (
-                      $('#fSantuario').is(':checked') &&
-                      $('#fLinhas').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
+            switch (geo) {
+              case 'Point':
+                if (
+                  $('#' + categoria.nome + categoria.id).is(':checked') &&
+                  $('#fPontos').is(':checked')
+                ) {
+                  return true;
+                } else {
+                  return false;
                 }
-              case 'Jardins':
-                switch (geo) {
-                  case 'Point':
-                    if (
-                      $('#fJardins').is(':checked') &&
-                      $('#fPontos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'Polygon':
-                    if (
-                      $('#fJardins').is(':checked') &&
-                      $('#fPoligonos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'LineString':
-                    if (
-                      $('#fJardins').is(':checked') &&
-                      $('#fLinhas').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
+              case 'Polygon':
+                if (
+                  $('#' + categoria.nome + categoria.id).is(':checked') &&
+                  $('#fPoligonos').is(':checked')
+                ) {
+                  return true;
+                } else {
+                  return false;
                 }
-              case 'Monumentos':
-                switch (geo) {
-                  case 'Point':
-                    if (
-                      $('#fMonumentos').is(':checked') &&
-                      $('#fPontos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'Polygon':
-                    if (
-                      $('#fMonumentos').is(':checked') &&
-                      $('#fPoligonos').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  case 'LineString':
-                    if (
-                      $('#fMonumentos').is(':checked') &&
-                      $('#fLinhas').is(':checked')
-                    ) {
-                      return true;
-                    } else {
-                      return false;
-                    }
+              case 'LineString':
+                if (
+                  $('#' + categoria.nome + categoria.id).is(':checked') &&
+                  $('#fLinhas').is(':checked')
+                ) {
+                  return true;
+                } else {
+                  return false;
                 }
             }
           },
