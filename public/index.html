@@ -16,7 +16,7 @@
       integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./styles/style.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link
       href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -28,14 +28,14 @@
     <title>Login</title>
   </head>
 
-  <body style="background-color: #979797;">
-    <div id="logreg-forms" style="border-radius: 25px;">
+  <body style="background-color: #979797">
+    <div id="logreg-forms" style="border-radius: 25px">
       <form class="form-signin">
-        <br>
+        <br />
         <h1 class="h3 mb-3 font-weight-bolder" style="text-align: center">
           Login
         </h1>
-        <br>
+        <br />
         <input
           type="username"
           id="iusername"
@@ -51,20 +51,29 @@
           placeholder="Password"
           required=""
         />
-        <br>
-        <button class="btn btn-success btn-block" id="blogin" style="border-radius: 15px;">
+        <br />
+        <button
+          class="btn btn-success btn-block"
+          id="blogin"
+          style="border-radius: 15px"
+        >
           <i class="fas fa-sign-in-alt"></i> Login
         </button>
         <hr />
-        <button class="btn btn-primary btn-block" type="button" id="btn-signup" style="border-radius: 15px;">
+        <button
+          class="btn btn-primary btn-block"
+          type="button"
+          id="btn-signup"
+          style="border-radius: 15px"
+        >
           <i class="fas fa-user-plus"></i> Registar Nova Conta
         </button>
       </form>
 
       <form action="/signup/" class="form-signup">
-        <br>
-        <h3 style="text-align:center">Registar</h3>
-        <br>
+        <br />
+        <h3 style="text-align: center">Registar</h3>
+        <br />
         <input
           type="text"
           id="irname"
@@ -97,8 +106,12 @@
           required
           autofocus=""
         />
-        <br>
-        <button class="btn btn-success btn-block" id="bregistar" style="border-radius: 15px;">
+        <br />
+        <button
+          class="btn btn-success btn-block"
+          id="bregistar"
+          style="border-radius: 15px"
+        >
           <i class="fas fa-user-plus"></i> Registar
         </button>
 
@@ -113,58 +126,57 @@
   <script>
     function toggleSignUp(e) {
       e.preventDefault();
-      $("#logreg-forms .form-signin").toggle();
-      $("#logreg-forms .form-signup").toggle();
+      $('#logreg-forms .form-signin').toggle();
+      $('#logreg-forms .form-signup').toggle();
     }
 
     $(() => {
       // Login Register Form
-      $("#logreg-forms #btn-signup").click(toggleSignUp);
-      $("#logreg-forms #cancel_signup").click(toggleSignUp);
+      $('#logreg-forms #btn-signup').click(toggleSignUp);
+      $('#logreg-forms #cancel_signup').click(toggleSignUp);
     });
 
-
-    $("#bregistar").click(() => {
-      fetch("http://localhost:5000/api/register", {
+    $('#bregistar').click(() => {
+      fetch('http://localhost:5000/api/register', {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
-          name: $("#irname").val(),
-          username: $("#irusername").val(),
-          password: $("#irpassword").val(),
+          name: $('#irname').val(),
+          username: $('#irusername').val(),
+          password: $('#irpassword').val(),
         }),
-      }).then(res => {
-        window.location = "http://localhost:5000/";
-        alert("User adicionado com sucesso!");
+      }).then((res) => {
+        window.location = 'http://localhost:5000/';
+        alert('User adicionado com sucesso!');
       });
     });
 
-    $("#blogin").click(() => {
-      fetch("http://localhost:5000/api/login", {
+    $('#blogin').click(() => {
+      fetch('http://localhost:5000/api/login', {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
-          username: $("#iusername").val(),
-          password: $("#ipassword").val(),
+          username: $('#iusername').val(),
+          password: $('#ipassword').val(),
         }),
       })
-        .then(res => {
+        .then((res) => {
           return res.json();
         })
-        .then(user => {
+        .then((user) => {
           console.log(user.username);
-          if (user.login === "null") {
-            alert("Username ou palavra passe errados!");
-          } else if(user.username == "admin" && user.password =="admin"){
-            localStorage.setItem("login", user.name);
-            window.location.href = "http://localhost:5000/map.html";
-          }else{
-            localStorage.setItem("login", "convidado");
-            window.location.href = "http://localhost:5000/map.html";
+          if (user.login === 'null') {
+            alert('Username ou palavra passe errados!');
+          } else if (user.username == 'admin' && user.password == 'admin') {
+            localStorage.setItem('login', user.name);
+            window.location.href = 'http://localhost:5000/map.html';
+          } else {
+            localStorage.setItem('login', 'convidado');
+            window.location.href = 'http://localhost:5000/map.html';
           }
         });
     });
